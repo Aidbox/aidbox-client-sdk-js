@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from 'node-fetch';
 
 import * as resource from './resource.json';
 
@@ -6,10 +6,9 @@ import * as resource from './resource.json';
 
 // const { resolve, parse, format } = require('url');
 
-
 enum EAuthorizationMode {
   CLIENT_CREDENTIALS_GRANT,
-  RESOURCE_OWNER_GRANT
+  RESOURCE_OWNER_GRANT,
 }
 
 type TInstanceCredentials = {
@@ -20,8 +19,11 @@ type TInstanceCredentials = {
 };
 
 type TInstanceOptions = {
-  readonly insertIntoStorage: (name: string, value: string) => Promise<void> | void,
-  readonly obtainFromStorage: (name: string) => Promise<string> | string,
+  readonly insertIntoStorage: (
+    name: string,
+    value: string
+  ) => Promise<void> | void;
+  readonly obtainFromStorage: (name: string) => Promise<string> | string;
 };
 
 type TAuthorizationData = {
@@ -29,19 +31,31 @@ type TAuthorizationData = {
   readonly expires_in: number;
   readonly access_token: string;
   readonly refresh_token: string;
-  readonly userinfo: { readonly email: string; readonly id: string; readonly resourceType: "User" }
-}
+  readonly userinfo: {
+    readonly email: string;
+    readonly id: string;
+    readonly resourceType: 'User';
+  };
+};
 
 type TContext = {
-  readonly box: { readonly URL: string; readonly CLIENT_ID: string; readonly CLIENT_SECRET: string };
-  readonly auth: { readonly token: string; readonly refresh_token: string; readonly mode: EAuthorizationMode };
+  readonly box: {
+    readonly URL: string;
+    readonly CLIENT_ID: string;
+    readonly CLIENT_SECRET: string;
+  };
+  readonly auth: {
+    readonly token: string;
+    readonly refresh_token: string;
+    readonly mode: EAuthorizationMode;
+  };
   readonly storage: TInstanceOptions;
-}
+};
 
 type TRequestResponse = {
   readonly data: any;
   readonly status: number;
-}
+};
 
 // function resolvePath(path, ...parts) {
 //   return join(resolve(this.aidboxUrl, path), ...parts);
@@ -63,29 +77,35 @@ type TRequestResponse = {
 
 //TODO: URL resolver without dom environment
 
-const request = (context: TContext) => async (endpoint, parameters): Promise<TRequestResponse> => {
+const request = (context: TContext) => async (
+  endpoint,
+  parameters
+): Promise<TRequestResponse> => {
   try {
     const isDataExisted = 'data' in parameters;
 
-    const token = await context.storage.obtainFromStorage('app.aidbox.auth.resource');
+    const token = await context.storage.obtainFromStorage(
+      'app.aidbox.auth.resource'
+    );
 
-    console.log('path',{
+    console.log('path', {
       method: isDataExisted ? 'POST' : 'GET',
       headers: {
-        ...isDataExisted && { 'Content-Type': 'application/json' },
-        ...token && { 'Authorization': `Bearer ${token}` },
+        ...(isDataExisted && { 'Content-Type': 'application/json' }),
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...parameters.headers,
       },
-      ...isDataExisted && { body: JSON.stringify(parameters.data) }})
+      ...(isDataExisted && { body: JSON.stringify(parameters.data) }),
+    });
 
     const request = await fetch(new URL(endpoint, context.box.URL), {
       method: isDataExisted ? 'POST' : 'GET',
       headers: {
-        ...isDataExisted && { 'Content-Type': 'application/json' },
-        ...token && { 'Authorization': `Bearer ${token}` },
+        ...(isDataExisted && { 'Content-Type': 'application/json' }),
+        ...(token && { Authorization: `Bearer ${token}` }),
         ...parameters.headers,
       },
-      ...isDataExisted && { body: JSON.stringify(parameters.data) },
+      ...(isDataExisted && { body: JSON.stringify(parameters.data) }),
       //mode: 'cors', // no-cors, *cors, same-origin
       //cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
       //credentials: 'same-origin', // include, *same-origin, omit
@@ -96,12 +116,12 @@ const request = (context: TContext) => async (endpoint, parameters): Promise<TRe
 
     const response = await request.json();
 
-    return { data: response, status: request.status }
-  } catch(exception) {
+    return { data: response, status: request.status };
+  } catch (exception) {
     console.warn(exception);
-    return { data: { message: 'something went wrong...' }, status: 0 }
+    return { data: { message: 'something went wrong...' }, status: 0 };
   }
-}
+};
 
 const implicitAuthorization = () => {
   // const client = this.options.client;
@@ -123,74 +143,70 @@ const implicitAuthorization = () => {
   //   state,
   // });
   // targetWindow.location = oauth2TokenEndpoint;
-}
+};
 
 const resourceOwnerAuthorization = async (context: TContext, credentials) => {
   const { username, password } = credentials;
 
   const response = await request(context)('/auth/token', {
     data: {
-      username, password,
+      username,
+      password,
       client_id: context.box.CLIENT_ID,
       client_secret: context.box.CLIENT_SECRET,
-      grant_type: 'password'
-    }
-  })
+      grant_type: 'password',
+    },
+  });
 
   if (response.status === 200) {
     context.storage.insertIntoStorage(
       'app.aidbox.auth.resource',
       response.data.access_token
-    )
+    );
   }
-}
-
+};
 
 // const request = (path, parameters = {}) => {
 //   const url = this.resolvePath(path, parameters.id);
 
-
-
-
-
-  // const url = this.resolvePath(path, parameters.id);
-  // const client = this.options?.client;
-  // const query = Object.assign(
-  //   {},
-  //   parameters.query,
-  //   parse(url, {
-  //     parseQueryString: true,
-  //   }).query,
-  // );
-  // const accessToken = this.getAccessToken();
-  // const data = {
-  //   url: url,
-  //   method: parameters.body ? (parameters.id ? 'PUT' : 'POST') : 'GET',
-  //   ...parameters,
-  //   query: query,
-  //   headers: {
-  //     'Content-Type': parameters.body ? 'application/json' : null,
-  //     Authorization: accessToken
-  //       ? `Bearer ${accessToken}`
-  //       : client?.secret
-  //         ? `Basic ${btoa(client.id + ':' + client.secret)}`
-  //         : null,
-  //     ...parameters?.headers,
-  //   },
-  // };
-  //
-  // if (data.headers) {
-  //   Object.keys(data.headers).forEach((headerName) => {
-  //     if (data.headers[headerName] === null) {
-  //       delete data.headers[headerName];
-  //     }
-  //   });
-  // }
-  //
-  // if (data.body && typeof data.body !== 'string') {
-  //   data.body = JSON.stringify(data.body);
-  // }
-  // return this.send(data);
+// const url = this.resolvePath(path, parameters.id);
+// const client = this.options?.client;
+// const query = Object.assign(
+//   {},
+//   parameters.query,
+//   parse(url, {
+//     parseQueryString: true,
+//   }).query,
+// );
+// const accessToken = this.getAccessToken();
+// const data = {
+//   url: url,
+//   method: parameters.body ? (parameters.id ? 'PUT' : 'POST') : 'GET',
+//   ...parameters,
+//   query: query,
+//   headers: {
+//     'Content-Type': parameters.body ? 'application/json' : null,
+//     Authorization: accessToken
+//       ? `Bearer ${accessToken}`
+//       : client?.secret
+//         ? `Basic ${btoa(client.id + ':' + client.secret)}`
+//         : null,
+//     ...parameters?.headers,
+//   },
+// };
+//
+// if (data.headers) {
+//   Object.keys(data.headers).forEach((headerName) => {
+//     if (data.headers[headerName] === null) {
+//       delete data.headers[headerName];
+//     }
+//   });
+// }
+//
+// if (data.body && typeof data.body !== 'string') {
+//   data.body = JSON.stringify(data.body);
+// }
+// return this.send(data);
 // }
 
 // const authorizationMode = Object.freeze({
@@ -224,7 +240,9 @@ const resourceOwnerAuthorization = async (context: TContext, credentials) => {
 //   return access_token;
 // }
 
-const authorize = (context: TContext) => async (credentials): Promise<TAuthorizationData> => {
+const authorize = (context: TContext) => async (
+  credentials
+): Promise<TAuthorizationData> => {
   const response = await resourceOwnerAuthorization(context, credentials);
 
   console.log(response);
@@ -238,20 +256,19 @@ const authorize = (context: TContext) => async (credentials): Promise<TAuthoriza
   // return new Promise(() => {
   //   return resourceOwnerFlow();
   // });
-  return
-}
+  return;
+};
 
-  // POST /auth/token
-  // Content-Type: application/json
+// POST /auth/token
+// Content-Type: application/json
 
-  // {
-  //   "grant_type": "password",
-  //   "client_id": "myapp",
-  //   "client_secret": "verysecret",
-  //   "username": "user",
-  //   "password": "password"
-  // }
-
+// {
+//   "grant_type": "password",
+//   "client_id": "myapp",
+//   "client_secret": "verysecret",
+//   "username": "user",
+//   "password": "password"
+// }
 
 //
 // const closeSession = (context) => {
@@ -265,24 +282,31 @@ const authorize = (context: TContext) => async (credentials): Promise<TAuthoriza
 //   this.authStorage(targetWindow, null);
 // }
 
-
-const initializeInstance = (credentials: TInstanceCredentials, options: TInstanceOptions) => {
-  const { URL, CLIENT_ID, CLIENT_SECRET, AUTH_MODE = EAuthorizationMode.RESOURCE_OWNER_GRANT } = credentials;
+const initializeInstance = (
+  credentials: TInstanceCredentials,
+  options: TInstanceOptions
+) => {
+  const {
+    URL,
+    CLIENT_ID,
+    CLIENT_SECRET,
+    AUTH_MODE = EAuthorizationMode.RESOURCE_OWNER_GRANT,
+  } = credentials;
   const { insertIntoStorage, obtainFromStorage } = options;
 
   const context = {
     auth: { token: '', refresh_token: '', mode: AUTH_MODE },
     box: { URL, CLIENT_ID, CLIENT_SECRET },
     storage: { insertIntoStorage, obtainFromStorage },
-  }
+  };
 
   return {
     authorize: authorize(context),
     request: request(context),
     closeSession: request(context),
-  }
-}
+  };
+};
 
 export const Client = {
   initializeInstance,
-}
+};

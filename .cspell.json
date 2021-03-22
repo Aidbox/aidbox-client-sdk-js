@@ -21,7 +21,13 @@
     "sandboxed",
     "transpiled",
     "typedoc",
-    "untracked"
+    "untracked",
+    "aidbox",
+    "Aidbox",
+    "userinfo",
+    "randomstring",
+    "myapp",
+    "verysecret"
   ],
   "flagWords": [],
   "ignorePaths": [
