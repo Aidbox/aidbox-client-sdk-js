@@ -2,12 +2,12 @@ import * as resource from './resource.json';
 
 export enum EAuthorizationMode {
   RESOURCE_OWNER_GRANT,
-  CLIENT_CREDENTIALS_GRANT
+  CLIENT_CREDENTIALS_GRANT,
 }
 
 export enum EAPIMode {
   FHIR,
-  AIDBOX
+  AIDBOX,
 }
 
 export type TInstanceCredentials = {
@@ -18,8 +18,11 @@ export type TInstanceCredentials = {
 };
 
 export type TInstanceOptions = {
-  readonly insertIntoStorage: (name: string, value: string) => Promise<void> | void,
-  readonly obtainFromStorage: (name: string) => Promise<string> | string,
+  readonly insertIntoStorage: (
+    name: string,
+    value: string
+  ) => Promise<void> | void;
+  readonly obtainFromStorage: (name: string) => Promise<string> | string;
 };
 
 export type TAuthorizationData = {
@@ -39,7 +42,7 @@ type TContext = {
     readonly URL: string;
     readonly CLIENT_ID: string;
     readonly CLIENT_SECRET: string;
-    readonly AUTH_MODE: EAuthorizationMode,
+    readonly AUTH_MODE: EAuthorizationMode;
   };
   readonly storage: TInstanceOptions;
 };
@@ -48,7 +51,7 @@ export type TRequest = {
   readonly headers?: any;
   readonly data?: any;
   readonly method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-}
+};
 
 export type TRequestResponse<D = any> = {
   readonly data: D;
@@ -56,14 +59,22 @@ export type TRequestResponse<D = any> = {
 };
 
 export type TPublicAPI = {
-  readonly authorize: (credentials: any) => Promise<TRequestResponse<TAuthorizationData>>,
-  readonly request: (endpoint: string, parameters: TRequest) => Promise<TRequestResponse>,
-  readonly closeSession: () => Promise<TRequestResponse>,
-  readonly getUserInfo: () => Promise<TRequestResponse>,
-  readonly resource: any
-}
+  readonly authorize: (
+    credentials: any
+  ) => Promise<TRequestResponse<TAuthorizationData>>;
+  readonly request: (
+    endpoint: string,
+    parameters: TRequest
+  ) => Promise<TRequestResponse>;
+  readonly closeSession: () => Promise<TRequestResponse>;
+  readonly getUserInfo: () => Promise<TRequestResponse>;
+  readonly resource: any;
+};
 
-const request = (context: TContext) => async (endpoint, parameters: TRequest = {}): Promise<TRequestResponse> => {
+const request = (context: TContext) => async (
+  endpoint,
+  parameters: TRequest = {}
+): Promise<TRequestResponse> => {
   try {
     const isDataExisted = 'data' in parameters;
 
@@ -89,35 +100,16 @@ const request = (context: TContext) => async (endpoint, parameters: TRequest = {
 
     const response = await request.json();
 
-    return { data: response, status: request.status }
-  } catch(exception) {
-    return { data: { message: 'something went wrong...' }, status: 0 }
+    return { data: response, status: request.status };
+  } catch (exception) {
+    return { data: { message: 'something went wrong...' }, status: 0 };
   }
 };
 
-const implicitAuthorization = () => {
-  // const client = this.options.client;
-  // const state = randomstring();
-  // const params = {
-  //   client_id: client.id,
-  //   redirect_uri: client.redirect_uri,
-  //   scope: client.scope,
-  //   state: state,
-  //   response_type: 'token',
-  // };
-  // const oauth2Endpoint = this.resolvePath('/auth/authorize');
-  // const query = Object.keys(params)
-  //   .filter((p) => params[p])
-  //   .map((p) => `${p}=${encodeURIComponent(params[p])}`)
-  //   .join('&');
-  // const oauth2TokenEndpoint = oauth2Endpoint + '?' + query;
-  // this.authStorage(targetWindow, {
-  //   state,
-  // });
-  // targetWindow.location = oauth2TokenEndpoint;
-};
-
-const resourceOwnerAuthorization = async (context: TContext, credentials): Promise<TRequestResponse> => {
+const resourceOwnerAuthorization = async (
+  context: TContext,
+  credentials
+): Promise<TRequestResponse> => {
   const { username, password } = credentials;
 
   const response = await request(context)('/auth/token', {
@@ -137,27 +129,39 @@ const resourceOwnerAuthorization = async (context: TContext, credentials): Promi
     );
   }
 
-  return response
+  return response;
 };
 
 const getUserInfo = (context: TContext) => (): Promise<TRequestResponse> => {
   return request(context)('/auth/userinfo');
-}
+};
 
-const authorize = (context: TContext) => async (credentials): Promise<TRequestResponse<TAuthorizationData>> => {
+const authorize = (context: TContext) => async (
+  credentials
+): Promise<TRequestResponse<TAuthorizationData>> => {
   if (context.box.AUTH_MODE === EAuthorizationMode.RESOURCE_OWNER_GRANT) {
     return resourceOwnerAuthorization(context, credentials);
   }
-}
+};
 
-const closeSession = (context: TContext) => async (): Promise<TRequestResponse> => {
+const closeSession = (
+  context: TContext
+) => async (): Promise<TRequestResponse> => {
   const response = await request(context)('/Session', { method: 'DELETE' });
-  context.storage.insertIntoStorage('app.aidbox.auth.resource', '')
-  return response
-}
+  context.storage.insertIntoStorage('app.aidbox.auth.resource', '');
+  return response;
+};
 
-const initializeInstance = (credentials: TInstanceCredentials, options: TInstanceOptions): TPublicAPI | Error  => {
-  const { URL, CLIENT_ID, CLIENT_SECRET, AUTH_MODE = EAuthorizationMode.RESOURCE_OWNER_GRANT } = credentials;
+const initializeInstance = (
+  credentials: TInstanceCredentials,
+  options: TInstanceOptions
+): TPublicAPI | Error => {
+  const {
+    URL,
+    CLIENT_ID,
+    CLIENT_SECRET,
+    AUTH_MODE = EAuthorizationMode.RESOURCE_OWNER_GRANT,
+  } = credentials;
   const { insertIntoStorage, obtainFromStorage } = options;
 
   if (!URL) {
@@ -172,8 +176,13 @@ const initializeInstance = (credentials: TInstanceCredentials, options: TInstanc
     return new Error('@aidbox/client-js-sdk: Provide Aidbox CLIENT_SECRET');
   }
 
-  if (typeof insertIntoStorage !== 'function' || typeof obtainFromStorage !== 'function') {
-    return new Error('@aidbox/client-js-sdk: Provide insertIntoStorage and obtainFromStorage methods');
+  if (
+    typeof insertIntoStorage !== 'function' ||
+    typeof obtainFromStorage !== 'function'
+  ) {
+    return new Error(
+      '@aidbox/client-js-sdk: Provide insertIntoStorage and obtainFromStorage methods'
+    );
   }
 
   const context = {
@@ -187,9 +196,9 @@ const initializeInstance = (credentials: TInstanceCredentials, options: TInstanc
     closeSession: closeSession(context),
     getUserInfo: getUserInfo(context),
     resource,
-  }
-}
+  };
+};
 
 export const Client = {
   initializeInstance,
-}
+};
