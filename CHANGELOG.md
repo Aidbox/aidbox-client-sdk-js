@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 1.2.0 (2021-03-22)
+
+
+### Features
+
+* **cleaning:** delete unused utils ([d274dd1](https://github.com/Aidbox/client-sdk-js/commit/d274dd1c00faaa37a6d47a73fe9c310fdb22ce2b))
+* **functional:** make api great again ([00286bd](https://github.com/Aidbox/client-sdk-js/commit/00286bd54e0c7aa71767ac9dad736c9b909e34bb))
+* **node-fetch:** remove node-fetch from imports ([932f44b](https://github.com/Aidbox/client-sdk-js/commit/932f44b3916b0c2fcac726fefc7fa5ee171994f9))
+* Do something not so useful ([21a054d](https://github.com/Aidbox/client-sdk-js/commit/21a054d8ed3372ee5ec855e3733a43446f97606e))
+
+
+### Bug Fixes
+
+* Failing test ([e8b62e7](https://github.com/Aidbox/client-sdk-js/commit/e8b62e75a959e780171d98816b5712ef7a2cf96d))
+* Fix absolutely nothing ([9f39d02](https://github.com/Aidbox/client-sdk-js/commit/9f39d02eb5ba078017fc983a39c4d4047afc1942))
+
 ### [1.1.1](https://github.com/Aidbox/client-sdk-js/compare/v1.1.0...v1.1.1) (2021-03-22)
 
 
