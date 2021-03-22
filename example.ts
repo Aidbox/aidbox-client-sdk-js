@@ -15,7 +15,18 @@ const storage = {
 
 const instance = Aidbox.initializeInstance(credentials, storage);
 
-const result = instance.authorize({ username: 'user-1', password: 'somegoodpassword' }).then(() => {
-  instance.request('/Patient/patient-1', {}).then(res => console.log('patient-1 ', res))
-})
+if (!(instance instanceof Error)) {
+  (async () => {
+    const session = await instance.authorize({ username: 'admin', password: 'qwedaszxc' });
 
+    console.log(session);
+
+    const patient = await instance.request('/Patient/patient-1', {});
+
+    console.log('patient', patient);
+
+    const user = await instance.getUserInfo();
+
+    console.log('user', user);
+  })()
+}
