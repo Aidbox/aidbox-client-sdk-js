@@ -59,56 +59,73 @@ export type TRequestResponse<D = any> = {
 };
 
 export type TPublicAPI = {
-  readonly authorize: (credentials?: any) => Promise<TRequestResponse<TAuthorizationData>>;
-  readonly request: (endpoint: string, parameters: TRequest) => Promise<TRequestResponse>;
+  readonly authorize: (
+    credentials?: any
+  ) => Promise<TRequestResponse<TAuthorizationData>>;
+  readonly request: (
+    endpoint: string,
+    parameters: TRequest
+  ) => Promise<TRequestResponse>;
   readonly closeSession: () => Promise<TRequestResponse>;
   readonly getUserInfo: () => Promise<TRequestResponse>;
   readonly resource: any;
 };
 
-type TAuthResponse = Promise<TRequestResponse<TAuthorizationData>>
+type TAuthResponse = Promise<TRequestResponse<TAuthorizationData>>;
 
-const getAuthorizationToken = async (storage: TInstanceOptions): Promise<string | undefined> => {
+const getAuthorizationToken = async (
+  storage: TInstanceOptions
+): Promise<string | undefined> => {
   try {
     return await storage.obtainFromStorage('app.aidbox.auth.resource');
-  } catch(error) {
-    return undefined
+  } catch (error) {
+    return undefined;
   }
-}
+};
 
-const setAuthorizationToken = async (storage: TInstanceOptions, token: string): Promise<any> => {
+const setAuthorizationToken = async (
+  storage: TInstanceOptions,
+  token: string
+): Promise<any> => {
   try {
     return await storage.insertIntoStorage('app.aidbox.auth.resource', token);
-  } catch(error) {
-    return
+  } catch (error) {
+    return;
   }
-}
+};
 
-const request = (context: TContext) => async (endpoint:string, parameters: TRequest = {}): Promise<TRequestResponse> => {
+const request = (context: TContext) => async (
+  endpoint: string,
+  parameters: TRequest = {}
+): Promise<TRequestResponse> => {
   const method = parameters.method || ('data' in parameters ? 'POST' : 'GET');
   const isDataSendMethod = /POST|PUT|PATCH/.test(method);
 
-  const uri = [// TODO: use default lib for handle uri
-    context.box.URL, context.box.FHIR_STRICT ? '/fhir' : '',endpoint,
-    method === 'GET' ? `?${dataToQuery(parameters.data)}` : ''
+  const uri = [
+    // TODO: use default lib for handle uri
+    context.box.URL,
+    context.box.FHIR_STRICT ? '/fhir' : '',
+    endpoint,
+    method === 'GET' ? `?${dataToQuery(parameters.data)}` : '',
   ].join('');
 
   const token = await getAuthorizationToken(context.storage);
 
   const response = await runRequest(uri, {
-    method, headers: {
+    method,
+    headers: {
       ...(isDataSendMethod && { 'Content-Type': 'application/json' }),
       ...(token && { Authorization: `Bearer ${token}` }),
       ...parameters.headers,
     },
     ...(isDataSendMethod && { body: JSON.stringify(parameters.data) }),
-  })
+  });
 
   if (response.status === 401) {
     await setAuthorizationToken(context.storage, '');
   }
 
-  return response
+  return response;
 };
 
 const runRequest = async (uri, params) => {
@@ -120,7 +137,7 @@ const runRequest = async (uri, params) => {
   } catch (exception) {
     return { data: exception, status: 0 };
   }
-}
+};
 
 const resourceOwnerAuthorization = async (
   context: TContext,
@@ -130,7 +147,8 @@ const resourceOwnerAuthorization = async (
 
   const response = await request(context)('/auth/token', {
     data: {
-      username, password,
+      username,
+      password,
       client_id: context.box.CLIENT_ID,
       client_secret: context.box.CLIENT_SECRET,
       grant_type: 'password',
@@ -138,22 +156,28 @@ const resourceOwnerAuthorization = async (
   });
 
   if (response.status === 200) {
-    await setAuthorizationToken(context.storage, response.data.access_token)
+    await setAuthorizationToken(context.storage, response.data.access_token);
   }
 
   return response;
 };
 
 const implicitAuthorization = async (context: TContext) => {
-  const data = { response_type: 'token', client_id: context.box.CLIENT_ID, scope: context.box.SCOPE }
+  const data = {
+    response_type: 'token',
+    client_id: context.box.CLIENT_ID,
+    scope: context.box.SCOPE,
+  };
   return [context.box.URL, '/auth/authorize', `?${dataToQuery(data)}`].join('');
-}
+};
 
 const getUserInfo = (context: TContext) => (): Promise<TRequestResponse> => {
   return request(context)('/auth/userinfo');
 };
 
-const authorize = (context: TContext) => async (params): Promise<TAuthResponse | any> => {
+const authorize = (context: TContext) => async (
+  params
+): Promise<TAuthResponse | any> => {
   if (context.box.AUTH_MODE === EAuthorizationMode.RESOURCE_OWNER_GRANT) {
     return resourceOwnerAuthorization(context, params);
   }
@@ -165,13 +189,18 @@ const authorize = (context: TContext) => async (params): Promise<TAuthResponse |
   }
 };
 
-const closeSession = (context: TContext) => async (): Promise<TRequestResponse> => {
+const closeSession = (
+  context: TContext
+) => async (): Promise<TRequestResponse> => {
   const response = await request(context)('/Session', { method: 'DELETE' });
   await setAuthorizationToken(context.storage, '');
   return response;
 };
 
-const initializeInstance = (credentials: TInstanceCredentials, options?: TInstanceOptions): TPublicAPI | Error => {
+const initializeInstance = (
+  credentials: TInstanceCredentials,
+  options?: TInstanceOptions
+): TPublicAPI | Error => {
   const {
     URL,
     CLIENT_ID,
