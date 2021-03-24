@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.1](https://github.com/Aidbox/client-sdk-js/compare/v1.2.0...v1.2.1) (2021-03-24)
+
+
+### Features
+
+* **auth:** add implicit authorization method ([c0e3138](https://github.com/Aidbox/client-sdk-js/commit/c0e3138f4649adb854a92793c75ace140c7d86e4))
+
+
+### Bug Fixes
+
+* **prettier:** run prettier fix ([76278ff](https://github.com/Aidbox/client-sdk-js/commit/76278ff0d384738a91c66dab3fbae32b091af1ef))
+
 ## 1.2.0 (2021-03-22)
 
 
