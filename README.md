@@ -6,29 +6,59 @@
 npm install @aidbox/client-sdk-js
 ```
 
-## Usage
+## Authorization
+
+### RESOURCE_OWNER_GRANT https://docs.aidbox.app/auth/resource-owner-password
 
 ```typescript
+  import Aidbox from '@aidbox/client-sdk-js'
+  
+  const credentials = {
+    URL: 'http://aidbox.domain',
+    CLIENT_ID: 'MY_CLIENT_ID',
+    CLIENT_SECRET: 'MY_CLIENT_SECRET',
+    AUTH_MODE: 0,
+    FHIR_STRICT: false,
+  }
+  
+  const storage = {
+    insertIntoStorage: localStorage.setItem,
+    obtainFromStorage: localStorage.getItem,
+  }
+  
+  const instance = Aidbox.initializeInstance(credentials, storage);
+  
+  await instance.authorize({ username: 'some-user', password: 'some-password' })
+  const user = instance.getUserInfo();
+```
 
-import Aidbox from '@aidbox/client-sdk-js'
+### IMPLICIT_GRANT https://docs.aidbox.app/auth/implicit
 
-// Specify Aidbox credentials
-const credentials = {
-  URL: 'http://localhost:8085',
-  CLIENT_ID: 'MY_CLIENT_ID',
-  CLIENT_SECRET: 'MY_CLIENT_SECRET'
-}
+```typescript
+  import Aidbox from '@aidbox/client-sdk-js'
+  
+  const credentials = {
+    URL: 'http://aidbox.domain',
+    CLIENT_ID: 'MY_CLIENT_ID',
+    REDIRECT_URI: 'http://application.auth',
+    AUTH_MODE: 1,
+    SCOPE: 'patient/*.read',
+  }
+  
+  const storage = {
+    insertIntoStorage: localStorage.setItem,
+    obtainFromStorage: localStorage.getItem,
+  }
+  
+  const instance = Aidbox.initializeInstance(credentials, storage);
+  
+  const authorizationURI = await instance.authorize();
 
-// Define storage
-const storage = {
-  insertIntoStorage: localStorage.setItem,
-  obtainFromStorage: localStorage.getItem,
-}
+  window.location.replace(authorizationURI);
 
-const instance = Aidbox.initializeInstance(credentials, storage);
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('access_token')
 
-// Authorize and retrieve patient data
-instance.authorize({ username: 'some-user', password: 'some-password' })
-  .then(() => instance.request('/Patient/some-patient', {}))
-  .then(patient => console.log('Patient data', patient))
+  await instance.authorize(token);
+  const user = instance.getUserInfo();
 ```
