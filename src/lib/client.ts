@@ -20,7 +20,7 @@ export type TInstanceOptions = {
     name: string,
     value: string
   ) => Promise<void> | void;
-  readonly obtainFromStorage: (name: string) => Promise<string> | string;
+  readonly obtainFromStorage: (name: string) => Promise<string> | string | null;
 };
 
 export type TAuthorizationData = {
@@ -33,6 +33,8 @@ export type TAuthorizationData = {
     readonly id: string;
     readonly resourceType: 'User';
   };
+  readonly error_description?: string;
+  readonly error?: string;
 };
 
 type TContext = {
