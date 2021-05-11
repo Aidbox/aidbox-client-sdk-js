@@ -5,8 +5,7 @@ export const dataToQuery = (data: any): string => {
     .join('&');
 };
 
-export const parseResponse = (response) => {
-  console.log(JSON.stringify(response));
+export const parseResponse = (response: any) => {
   switch (response?.headers?.get('Content-Type')) {
     case 'application/json':
       return response.json();
