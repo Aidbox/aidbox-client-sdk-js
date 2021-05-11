@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.4](https://github.com/Aidbox/client-sdk-js/compare/v1.2.3...v1.2.4) (2021-05-11)
+
+
+### Features
+
+* **client:** Add getToken, resetToken ([acd92ac](https://github.com/Aidbox/client-sdk-js/commit/acd92acfd3f4ed15c3dd81416449dafabf622f81))
+
 ### [1.2.3](https://github.com/Aidbox/client-sdk-js/compare/v1.2.2...v1.2.3) (2021-04-09)
 
 ### [1.2.2](https://github.com/Aidbox/client-sdk-js/compare/v1.2.1...v1.2.2) (2021-04-09)
