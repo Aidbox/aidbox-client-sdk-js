@@ -14,7 +14,10 @@ let token = ''
 
 const storage = {
   insertIntoStorage: function(key, value) { token = value },
-  obtainFromStorage: function(key) { return token },
+  obtainFromStorage: function (key) { return token },
+  removeFromStorage(key: string) {
+   token = null
+  },
 }
 
 const instance = Aidbox.initializeInstance(credentials, storage);
@@ -26,7 +29,6 @@ if (!(instance instanceof Error)) {
     const patient = await instance.request('/Patient/patient-1', {});
 
     console.log('patient', patient);
-
     const user = await instance.getUserInfo();
 
     console.log('user', user);

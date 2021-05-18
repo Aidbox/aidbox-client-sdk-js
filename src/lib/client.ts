@@ -168,6 +168,7 @@ const initializeInstance = (credentials: TInstanceCredentials, options?: TInstan
     closeSession: closeSession(context),
     getUserInfo: getUserInfo(context),
     getToken: () => getAuthorizationToken(context.storage),
+    setToken: (token) => setAuthorizationToken(context.storage,token),
     resetToken: () => resetAuthorizationToken(context.storage),
     resource,
   };

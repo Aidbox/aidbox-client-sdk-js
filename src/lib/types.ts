@@ -67,6 +67,7 @@ export type TPublicAPI = {
   readonly closeSession: () => Promise<TRequestResponse>;
   readonly getUserInfo: () => Promise<TRequestResponse>;
   readonly getToken: () => Promise<string | null>;
+  readonly setToken: (token: string) => Promise<any>;
   readonly resetToken: () => Promise<void>;
   readonly resource: any;
 };
