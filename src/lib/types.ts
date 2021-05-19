@@ -48,6 +48,7 @@ export type TContext = {
 export type TRequest = {
   readonly headers?: any;
   readonly data?: any;
+  readonly queryParams?: Record<string, any>;
   readonly method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 };
 
@@ -57,13 +58,13 @@ export type TRequestResponse<D = any> = {
 };
 
 export type TCredentials = {
-  username: string;
-  password: string;
+  readonly username: string;
+  readonly password: string;
 };
 
 export type TPublicAPI = {
   readonly authorize: (credentials?: any) => Promise<TRequestResponse<TAuthorizationData>>;
-  readonly request: (endpoint: string, parameters: TRequest) => Promise<TRequestResponse>;
+  readonly request: (endpoint: string, parameters?: TRequest) => Promise<TRequestResponse>;
   readonly closeSession: () => Promise<TRequestResponse>;
   readonly getUserInfo: () => Promise<TRequestResponse>;
   readonly getToken: () => Promise<string | null>;
