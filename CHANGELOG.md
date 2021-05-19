@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.8](https://github.com/Aidbox/client-sdk-js/compare/v1.2.7...v1.2.8) (2021-05-19)
+
+
+### Features
+
+* **request:** accept queryParams field ([4bad0e5](https://github.com/Aidbox/client-sdk-js/commit/4bad0e5565fb897fef76c434dece436f65dbcb61))
+
 ### [1.2.7](https://github.com/Aidbox/client-sdk-js/compare/v1.2.6...v1.2.7) (2021-05-18)
 
 ### [1.2.6](https://github.com/Aidbox/client-sdk-js/compare/v1.2.5...v1.2.6) (2021-05-18)
