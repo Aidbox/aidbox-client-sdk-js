@@ -1,5 +1,4 @@
 /* eslint-disable functional/no-let */
-import resource from './resource.json';
 import {
   EAuthorizationMode,
   TAuthResponse,
@@ -13,14 +12,18 @@ import {
 } from './types';
 import { dataToQuery, parseResponse } from './utils';
 
-const getAuthorizationToken = async (storage: TInstanceOptions): Promise<string | null> => {
+const getAuthorizationToken = async (
+  storage: TInstanceOptions
+): Promise<string | null> => {
   try {
     return await storage.obtainFromStorage('app.aidbox.auth.resource');
   } catch (error) {
     return null;
   }
 };
-const resetAuthorizationToken = async (storage: TInstanceOptions): Promise<any> => {
+const resetAuthorizationToken = async (
+  storage: TInstanceOptions
+): Promise<any> => {
   try {
     await storage.removeFromStorage('app.aidbox.auth.resource');
   } catch (error) {
@@ -28,7 +31,10 @@ const resetAuthorizationToken = async (storage: TInstanceOptions): Promise<any> 
   }
 };
 
-const setAuthorizationToken = async (storage: TInstanceOptions, token: string): Promise<any> => {
+const setAuthorizationToken = async (
+  storage: TInstanceOptions,
+  token: string
+): Promise<any> => {
   try {
     return await storage.insertIntoStorage('app.aidbox.auth.resource', token);
   } catch (error) {
@@ -38,16 +44,15 @@ const setAuthorizationToken = async (storage: TInstanceOptions, token: string): 
 
 const request = (context: TContext) => async (
   endpoint: string,
-  parameters: TRequest = {},
+  parameters: TRequest = {}
 ): Promise<TRequestResponse> => {
   let method = 'GET';
   if (parameters.method) {
-    method = parameters.method
+    method = parameters.method;
   } else if (parameters.queryParams) {
-    method = "GET"
-  }
-  else if (parameters.data) {
-    method = 'POST'
+    method = 'GET';
+  } else if (parameters.data) {
+    method = 'POST';
   }
   const isDataSendMethod = /POST|PUT|PATCH/.test(method);
 
@@ -88,7 +93,10 @@ const runRequest = async (uri: string, params: any) => {
   }
 };
 
-const resourceOwnerAuthorization = async (context: TContext, credentials: TCredentials): Promise<TRequestResponse> => {
+const resourceOwnerAuthorization = async (
+  context: TContext,
+  credentials: TCredentials
+): Promise<TRequestResponse> => {
   const { username, password } = credentials;
 
   const response = await request(context)('/auth/token', {
@@ -117,26 +125,36 @@ const implicitAuthorization = async (context: TContext) => {
   return [context.box.URL, '/auth/authorize', `?${dataToQuery(data)}`].join('');
 };
 
-const getUserInfo = (context: TContext) => (): Promise<TRequestResponse> => request(context)('/auth/userinfo');
+const getUserInfo = (context: TContext) => (): Promise<TRequestResponse> =>
+  request(context)('/auth/userinfo');
 
-const authorize = (context: TContext) => async (params: any): Promise<TAuthResponse | any> => {
+const authorize = (context: TContext) => async (
+  params: any
+): Promise<TAuthResponse | any> => {
   if (context.box.AUTH_MODE === EAuthorizationMode.RESOURCE_OWNER_GRANT) {
     return resourceOwnerAuthorization(context, params);
   }
 
   if (context.box.AUTH_MODE === EAuthorizationMode.IMPLICIT_GRANT) {
-    return typeof params === 'string' ? setAuthorizationToken(context.storage, params) : implicitAuthorization(context);
+    return typeof params === 'string'
+      ? setAuthorizationToken(context.storage, params)
+      : implicitAuthorization(context);
   }
   return null;
 };
 
-const closeSession = (context: TContext) => async (): Promise<TRequestResponse> => {
+const closeSession = (
+  context: TContext
+) => async (): Promise<TRequestResponse> => {
   const response = await request(context)('/Session', { method: 'DELETE' });
   await resetAuthorizationToken(context.storage);
   return response;
 };
 
-const initializeInstance = (credentials: TInstanceCredentials, options?: TInstanceOptions): TPublicAPI | Error => {
+const initializeInstance = (
+  credentials: TInstanceCredentials,
+  options?: TInstanceOptions
+): TPublicAPI | Error => {
   const {
     URL,
     CLIENT_ID,
@@ -163,7 +181,9 @@ const initializeInstance = (credentials: TInstanceCredentials, options?: TInstan
     typeof obtainFromStorage !== 'function' ||
     typeof removeFromStorage !== 'function'
   ) {
-    return new Error('@aidbox/client-js-sdk: Provide insertIntoStorage and obtainFromStorage methods');
+    return new Error(
+      '@aidbox/client-js-sdk: Provide insertIntoStorage and obtainFromStorage methods'
+    );
   }
 
   const context = {
@@ -177,9 +197,8 @@ const initializeInstance = (credentials: TInstanceCredentials, options?: TInstan
     closeSession: closeSession(context),
     getUserInfo: getUserInfo(context),
     getToken: () => getAuthorizationToken(context.storage),
-    setToken: (token) => setAuthorizationToken(context.storage,token),
+    setToken: (token) => setAuthorizationToken(context.storage, token),
     resetToken: () => resetAuthorizationToken(context.storage),
-    resource,
   };
 };
 

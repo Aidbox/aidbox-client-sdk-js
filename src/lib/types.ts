@@ -13,7 +13,10 @@ export type TInstanceCredentials = {
 };
 
 export type TInstanceOptions = {
-  readonly insertIntoStorage: (name: string, value: string) => Promise<void> | void;
+  readonly insertIntoStorage: (
+    name: string,
+    value: string
+  ) => Promise<void> | void;
   readonly obtainFromStorage: (name: string) => Promise<string> | string | null;
   readonly removeFromStorage: (name: string) => Promise<void> | void;
 };
@@ -63,14 +66,18 @@ export type TCredentials = {
 };
 
 export type TPublicAPI = {
-  readonly authorize: (credentials?: any) => Promise<TRequestResponse<TAuthorizationData>>;
-  readonly request: (endpoint: string, parameters?: TRequest) => Promise<TRequestResponse>;
+  readonly authorize: (
+    credentials?: any
+  ) => Promise<TRequestResponse<TAuthorizationData>>;
+  readonly request: (
+    endpoint: string,
+    parameters?: TRequest
+  ) => Promise<TRequestResponse>;
   readonly closeSession: () => Promise<TRequestResponse>;
   readonly getUserInfo: () => Promise<TRequestResponse>;
   readonly getToken: () => Promise<string | null>;
   readonly setToken: (token: string) => Promise<any>;
   readonly resetToken: () => Promise<void>;
-  readonly resource: any;
 };
 
 export type TAuthResponse = Promise<TRequestResponse<TAuthorizationData>>;
