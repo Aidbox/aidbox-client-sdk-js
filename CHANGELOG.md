@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.11](https://github.com/Aidbox/client-sdk-js/compare/v1.2.10...v1.2.11) (2021-07-30)
+
+
+### Bug Fixes
+
+* Remove resource ([fbb7748](https://github.com/Aidbox/client-sdk-js/commit/fbb7748369cb168853d9604dd4c3138716867633))
+
 ### [1.2.10](https://github.com/Aidbox/client-sdk-js/compare/v1.2.9...v1.2.10) (2021-07-30)
 
 ### [1.2.9](https://github.com/Aidbox/client-sdk-js/compare/v1.2.8...v1.2.9) (2021-07-30)

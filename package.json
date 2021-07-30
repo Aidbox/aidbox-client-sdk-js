@@ -1,6 +1,6 @@
 {
   "name": "@aidbox/client-sdk-js",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "aidbox-client-sdk",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
