@@ -1,3 +1,5 @@
+/* eslint-disable functional/no-let */
+import resource from './resource.json';
 import {
   EAuthorizationMode,
   TAuthResponse,
@@ -9,7 +11,6 @@ import {
   TRequest,
   TRequestResponse,
 } from './types';
-import resource from './resource.json';
 import { dataToQuery, parseResponse } from './utils';
 
 const getAuthorizationToken = async (storage: TInstanceOptions): Promise<string | null> => {
@@ -39,14 +40,22 @@ const request = (context: TContext) => async (
   endpoint: string,
   parameters: TRequest = {},
 ): Promise<TRequestResponse> => {
-  const method = parameters.method || ('data' in parameters ? 'POST' : 'GET');
+  let method = 'GET';
+  if (parameters.method) {
+    method = parameters.method
+  } else if (parameters.queryParams) {
+    method = "GET"
+  }
+  else if (parameters.data) {
+    method = 'POST'
+  }
   const isDataSendMethod = /POST|PUT|PATCH/.test(method);
 
   const uri = [
     context.box.URL,
     context.box.FHIR_STRICT ? '/fhir' : '',
     endpoint,
-    method === 'GET' ? `?${dataToQuery(parameters.data)}` : '',
+    parameters.queryParams ? `?${dataToQuery(parameters.queryParams)}` : '',
   ].join('');
 
   const token = await getAuthorizationToken(context.storage);
@@ -168,6 +177,7 @@ const initializeInstance = (credentials: TInstanceCredentials, options?: TInstan
     closeSession: closeSession(context),
     getUserInfo: getUserInfo(context),
     getToken: () => getAuthorizationToken(context.storage),
+    setToken: (token) => setAuthorizationToken(context.storage,token),
     resetToken: () => resetAuthorizationToken(context.storage),
     resource,
   };
