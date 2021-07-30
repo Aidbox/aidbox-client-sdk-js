@@ -6,10 +6,9 @@ export const dataToQuery = (data: any): string => {
 };
 
 export const parseResponse = (response: any) => {
-  switch (response?.headers?.get('Content-Type')) {
-    case 'application/json':
-      return response.json();
-    default:
-      return response.text();
+  const contentType: string = response?.headers?.get('Content-Type');
+  if (contentType.includes('application/json')) {
+    return response.json();
   }
+  return response.text();
 };
